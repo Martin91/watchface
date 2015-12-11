@@ -75,6 +75,16 @@ static void main_window_unload(Window *window) {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+
+  if(tick_time->tm_min % 30 == 0) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Start outbox!");
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+
+    dict_write_uint8(iter, 0, 0);
+
+    app_message_outbox_send();
+  }
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
