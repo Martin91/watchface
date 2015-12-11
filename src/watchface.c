@@ -2,7 +2,9 @@
 
 static Window *s_main_window;
 static TextLayer *s_time_layer;
+static TextLayer *s_weather_layer;
 static GFont s_time_font;
+static GFont s_weather_font;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 
@@ -20,7 +22,10 @@ static void update_time() {
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
+
+  // 加载字体
   s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
+  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
 
   // 添加位图
   s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BACKGROUND);
@@ -31,17 +36,28 @@ static void main_window_load(Window *window) {
   // 创建文本层
   s_time_layer = text_layer_create(
     GRect(0, PBL_IF_ROUND_ELSE(58, 52), bounds.size.w, 50));
-
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_color(s_time_layer, GColorBlack);
   text_layer_set_font(s_time_layer, s_time_font);
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
+  // 天气信息层
+  s_weather_layer = text_layer_create(
+      GRect(0, PBL_IF_ROUND_ELSE(125, 120), bounds.size.w, 25));
+  text_layer_set_background_color(s_weather_layer, GColorClear);
+  text_layer_set_text_color(s_weather_layer, GColorWhite);
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+  text_layer_set_font(s_weather_layer, s_weather_font);
+  text_layer_set_text(s_weather_layer, "Loading...");
+
+  layer_add_child(window_layer, text_layer_get_layer(s_weather_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 }
 
 static void main_window_unload(Window *window) {
+  fonts_unload_custom_font(s_weather_font);
   fonts_unload_custom_font(s_time_font);
+  text_layer_destroy(s_weather_layer);
   text_layer_destroy(s_time_layer);
   gbitmap_destroy(s_background_bitmap);
   bitmap_layer_destroy(s_background_layer);
